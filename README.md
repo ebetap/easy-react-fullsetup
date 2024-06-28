@@ -1,29 +1,76 @@
-Here’s a summary of what it does:
+# React.js Project Setup Script Documentation
 
-1. **Install Dependencies**:
-   - Installs TailwindCSS, PostCSS, Autoprefixer, React Router, Redux Toolkit, React Hook Form, React Helmet, Redux Persist, ESLint, Prettier, and related plugins.
+## Overview
+This script automates the setup process for a React.js project with essential tools and configurations. It initializes Git, installs dependencies, sets up ESLint and Prettier, configures React Router and Redux Toolkit with API integration, creates necessary directory structures, and prepares Docker and GitHub Actions configurations.
 
-2. **Setup ESLint and Prettier**:
-   - Configures ESLint and Prettier with a `.eslintrc.json` and a `.prettierrc` file to enforce code style.
+## Prerequisites
+- Node.js installed (version 14 or higher recommended)
+- npm (Node Package Manager) installed
+- Basic familiarity with Bash scripting
 
-3. **Setup Directory Structure**:
-   - Creates directories for components, features, pages, the main app, styles, hooks, and utilities.
-   - Initializes main files like `store.js`, `App.js`, `index.js`, and `tailwind.css`.
+## Usage
+1. **Customize Parameters**: Edit the `PROJECT_NAME`, `API_URL`, and `DOCKER_PORT` variables in the script according to your project requirements.
 
-4. **React Router and Redux Toolkit Setup**:
-   - Sets up basic routing and Redux store with Redux Persist and RTK Query.
-   - Adds basic page components for `Home` and `About` with React Helmet for SEO.
+2. **Run the Script**:
+   ```bash
+   bash setup-react-project.sh
+   ```
 
-5. **Create .env File**:
-   - Adds a `.env` file with an example API URL.
+   Replace `setup-react-project.sh` with the name of your script file.
 
-6. **Create Dockerfile**:
-   - Provides a Dockerfile for containerizing the application.
+3. **Follow Prompts**: The script will prompt you during the Git repository initialization, ensuring you understand whether it's a new repository or an existing one.
 
-7. **Create docker-compose.yml**:
-   - Adds a `docker-compose.yml` file to run the application with Docker Compose.
+4. **Completion**: Once the script finishes execution, your React.js project will be set up with the configured tools and configurations.
 
-8. **Create GitHub Actions Workflow**:
-   - Sets up a basic CI pipeline using GitHub Actions to install dependencies and run tests on push to the main branch.
+## Components
+### 1. Git Repository Initialization
+- Initializes a new Git repository if one doesn't exist.
+- Commits initial project files.
 
-This script automates the initial setup process, saving time and ensuring consistency across different setups. You can customize the configurations as per your project's specific requirements.
+### 2. Dependency Installation
+- Installs necessary npm packages:
+  - Tailwind CSS for styling
+  - PostCSS and Autoprefixer for CSS processing
+  - React Router DOM for routing
+  - Redux Toolkit and related packages for state management
+  - Other utilities like ESLint, Prettier, Jest for testing, Axios for API requests, etc.
+
+### 3. ESLint and Prettier Setup
+- Configures ESLint with recommended settings for React applications.
+- Integrates Prettier for consistent code formatting.
+
+### 4. Directory Structure Setup
+- Creates essential directories:
+  - `src/components`, `src/features`, `src/pages` for React components and pages
+  - `src/app`, `src/styles`, `src/hooks`, `src/utils` for application structure
+- Initializes key files like `store.js`, `App.js`, `index.js`, and `tailwind.css`.
+
+### 5. React Router and Redux Toolkit Integration
+- Sets up basic routing with React Router.
+- Configures Redux Toolkit with API integration using `createApi` from `@reduxjs/toolkit/query/react`.
+- Provides example usage for fetching, adding, updating, and deleting posts from an API.
+
+### 6. Environment Configuration
+- Creates a `.env` file with the specified `API_URL`.
+
+### 7. Docker Setup
+- Generates a `Dockerfile` for containerizing the React application.
+- Creates a `docker-compose.yml` file for Docker Compose setup, exposing the application on the specified port (`DOCKER_PORT`).
+
+### 8. GitHub Actions Workflow
+- Creates a GitHub Actions workflow (`ci.yml`) for Continuous Integration (CI):
+  - Installs dependencies, runs tests, and deploys to production on successful builds.
+  - Includes a linting step using ESLint to maintain code quality.
+
+### 9. Versioning and Changelog Initialization
+- Initializes versioning with an initial version (`0.1.0`) and a `CHANGELOG.md` file to track project changes.
+
+## Customization
+- Edit `.eslintrc.json`, `.prettierrc`, `tailwind.config.js`, and other configuration files to tailor to specific project needs.
+- Modify API endpoints and Redux slices (`apiSlice.js`) based on your backend API structure.
+
+## Security Considerations
+- Ensure sensitive information (like API keys) is handled securely, possibly through environment variables.
+
+## Support and Feedback
+For questions, feedback, or issues related to this setup script, please reach out to beta.priyoko@students.amikom.ac.id
