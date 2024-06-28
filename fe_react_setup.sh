@@ -282,7 +282,22 @@ CMD ["npm", "start"]
 EOF
 }
 
-# Function to create GitHub Actions workflow (continued)
+# Function to create Docker Compose file
+create_docker_compose_file() {
+  echo "Creating Docker Compose file..."
+  cat <<EOF > "$PROJECT_NAME/docker-compose.yml"
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "$DOCKER_PORT:3000"
+    volumes:
+      - .:/app
+EOF
+}
+
+# Function to create GitHub Actions workflow
 create_github_actions_workflow() {
   echo "Creating GitHub Actions workflow..."
   mkdir -p "$PROJECT_NAME/.github/workflows"
