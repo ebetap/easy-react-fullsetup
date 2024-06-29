@@ -2,10 +2,10 @@
 
 set -e  # Exit script on any error
 
-# Parameters (customize as needed)
-PROJECT_NAME="my-react-app"
-API_URL="https://api.example.com"
-DOCKER_PORT="3000"
+# Prompt for parameters
+read -p "Enter project name: " PROJECT_NAME
+read -p "Enter API URL: " API_URL
+read -p "Enter Docker port: " DOCKER_PORT
 
 # Function to initialize Git repository if not already initialized
 initialize_git_repository() {
@@ -27,7 +27,7 @@ install_dependencies() {
     react-router-dom @reduxjs/toolkit @reduxjs/toolkit/query react-hook-form react-helmet redux-persist \
     eslint eslint-config-prettier eslint-plugin-prettier prettier \
     jest @testing-library/react @testing-library/jest-dom \
-    axios # Add axios for API requests
+    axios
 }
 
 # Function to setup ESLint and Prettier
@@ -67,7 +67,7 @@ setup_directory_structure() {
   touch "$PROJECT_NAME/jsconfig.json" "$PROJECT_NAME/tailwind.config.js"
 }
 
-# Function to setup React Router and Redux Toolkit with createApi setup
+# Function to setup React Router and Redux Toolkit with pokemonApi setup
 setup_react_router_redux_toolkit() {
   echo "Setting up React Router and Redux Toolkit..."
   cat <<EOF > "$PROJECT_NAME/src/App.js"
@@ -106,7 +106,7 @@ EOF
 
   cat <<EOF > "$PROJECT_NAME/src/app/store.js"
 import { configureStore } from '@reduxjs/toolkit';
-import { apiSlice } from '../features/api/apiSlice';
+import { pokemonApi } from '../features/api/pokemonApi';
 import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 
@@ -116,75 +116,80 @@ const persistConfig = {
 };
 
 const persistedReducer = persistReducer(persistConfig, {
-  [apiSlice.reducerPath]: apiSlice.reducer,
+  [pokemonApi.reducerPath]: pokemonApi.reducer,
 });
 
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(apiSlice.middleware),
+    getDefaultMiddleware().concat(pokemonApi.middleware),
 });
 
 export const persistor = persistStore(store);
 EOF
 
-  cat <<EOF > "$PROJECT_NAME/src/features/api/apiSlice.js"
+  cat <<EOF > "$PROJECT_NAME/src/features/api/pokemonApi.js"
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-export const apiSlice = createApi({
-  reducerPath: 'api',
+export const pokemonApi = createApi({
+  reducerPath: 'pokemonApi',
   baseQuery: fetchBaseQuery({ baseUrl: '$API_URL' }),
   endpoints: (builder) => ({
-    getPosts: builder.query({
-      query: () => 'posts',
+    getPokemons: builder.query({
+      query: () => 'pokemon',
     }),
-    getPostById: builder.query({
-      query: (id) => \`posts/\${id}\`,
+    getPokemonById: builder.query({
+      query: (id) => \`pokemon/\${id}\`,
     }),
-    addPost: builder.mutation({
-      query: (newPost) => ({
-        url: 'posts',
+    addPokemon: builder.mutation({
+      query: (newPokemon) => ({
+        url: 'pokemon',
         method: 'POST',
-        body: newPost,
+        body: newPokemon,
       }),
     }),
-    updatePost: builder.mutation({
-      query: ({ id, updatedPost }) => ({
-        url: \`posts/\${id}\`,
+    updatePokemon: builder.mutation({
+      query: ({ id, updatedPokemon }) => ({
+        url: \`pokemon/\${id}\`,
         method: 'PUT',
-        body: updatedPost,
+        body: updatedPokemon,
       }),
     }),
-    deletePost: builder.mutation({
+    deletePokemon: builder.mutation({
       query: (id) => ({
-        url: \`posts/\${id}\`,
+        url: \`pokemon/\${id}\`,
         method: 'DELETE',
       }),
     }),
   }),
 });
 
-export const { useGetPostsQuery, useGetPostByIdQuery, useAddPostMutation, useUpdatePostMutation, useDeletePostMutation } = apiSlice;
+export const {
+  useGetPokemonsQuery,
+  useGetPokemonByIdQuery,
+  useAddPokemonMutation,
+  useUpdatePokemonMutation,
+  useDeletePokemonMutation,
+} = pokemonApi;
 EOF
 
   cat <<EOF > "$PROJECT_NAME/src/pages/Home.js"
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Helmet } from 'react-helmet';
-import { useGetPostsQuery, useDeletePostMutation } from '../features/api/apiSlice';
+import {
+  useGetPokemonsQuery,
+  useDeletePokemonMutation,
+} from '../features/api/pokemonApi';
 
 function Home() {
-  const { data: posts, error, isLoading, isError } = useGetPostsQuery();
-  const [deletePost] = useDeletePostMutation();
+  const { data: pokemons, error, isLoading, isError } = useGetPokemonsQuery();
+  const [deletePokemon] = useDeletePokemonMutation();
 
-  useEffect(() => {
-    // Fetch posts on mount
-  }, []);
-
-  const handleDelete = async (postId) => {
+  const handleDelete = async (pokemonId) => {
     try {
-      await deletePost(postId).unwrap();
+      await deletePokemon(pokemonId).unwrap();
     } catch (err) {
-      console.error('Failed to delete post:', err);
+      console.error('Failed to delete Pokémon:', err);
     }
   };
 
@@ -194,15 +199,15 @@ function Home() {
   return (
     <div className="p-4">
       <Helmet>
-        <title>Home Page</title>
+        <title>Pokémon List</title>
       </Helmet>
-      <h1 className="text-xl">Home Page</h1>
+      <h1 className="text-xl">Pokémon List</h1>
       <div>
-        {posts.map((post) => (
-          <div key={post.id} className="border p-2 mb-2">
-            <h2>{post.title}</h2>
-            <p>{post.body}</p>
-            <button onClick={() => handleDelete(post.id)}>Delete</button>
+        {pokemons.map((pokemon) => (
+          <div key={pokemon.id} className="border p-2 mb-2">
+            <h2>{pokemon.name}</h2>
+            <p>{pokemon.type}</p>
+            <button onClick={() => handleDelete(pokemon.id)}>Delete</button>
           </div>
         ))}
       </div>
@@ -238,7 +243,7 @@ EOF
 
   cat <<EOF > "$PROJECT_NAME/tailwind.config.js"
 module.exports = {
-  darkMode: 'class', // or 'media'
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -360,9 +365,10 @@ EOF
 initialize_versioning_and_changelog() {
   echo "Initializing versioning and changelog..."
   echo "0.1.0" > "$PROJECT_NAME/VERSION"
-  touch "$PROJECT_NAME/CHANGELOG.md"
-  echo "# Changelog" > "$PROJECT_NAME/CHANGELOG.md"
-  echo "- Initial release" >> "$PROJECT_NAME/CHANGELOG.md"
+  cat <<EOF > "$PROJECT_NAME/CHANGELOG.md"
+# Changelog
+- Initial release
+EOF
 }
 
 # Main script function
